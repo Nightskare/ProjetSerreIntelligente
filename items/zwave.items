@@ -1,0 +1,23 @@
+// Items pour le contrôleur Z-Wave
+Number ZWaveController_StartFrames "Start Frames [%d]" { channel="zwave:serial_zstick:248eb65576:serial_sof" }
+Number ZWaveController_FramesAcknowledged "Frames Acknowledged [%d]" { channel="zwave:serial_zstick:248eb65576:serial_ack" }
+Number ZWaveController_FramesRejected "Frames Rejected [%d]" { channel="zwave:serial_zstick:248eb65576:serial_nak" }
+Number ZWaveController_FramesCancelled "Frames Cancelled [%d]" { channel="zwave:serial_zstick:248eb65576:serial_can" }
+Number ZWaveController_OOFBytesReceived "OOF Bytes Received [%d]" { channel="zwave:serial_zstick:248eb65576:serial_oof" }
+Number ZWaveController_ChecksumErrors "Received Checksum Errors [%d]" { channel="zwave:serial_zstick:248eb65576:serial_cse" }
+
+// Items pour le capteur de porte (Node 10)
+Switch DoorSensor_Binary "Binary Sensor" { channel="zwave:device:248eb65576:node10:sensor_binary" }
+Switch DoorSensor_TamperAlarm "Tamper Alarm" { channel="zwave:device:248eb65576:node10:alarm_tamper" }
+Contact DoorSensor "Door Sensor" { channel="zwave:device:248eb65576:node10:sensor_door" }
+Number DoorSensor_Battery "Battery Level [%d %%]" { channel="zwave:device:248eb65576:node10:battery-level" }
+
+// Items pour le détecteur de mouvement (Node 11)
+Switch MotionSensor_Binary "Binary Sensor" { channel="zwave:device:248eb65576:node11:sensor_binary" }
+Number MotionSensor_Luminance "Luminance [%.1f lx]" { channel="zwave:device:248eb65576:node11:sensor_luminance" }
+Switch MotionSensor_TamperAlarm "Tamper Alarm" { channel="zwave:device:248eb65576:node11:alarm_tamper" }
+Switch MotionSensor_MotionAlarm "Motion Alarm" { channel="zwave:device:248eb65576:node11:alarm_motion" }
+Number MotionSensor_Battery "Battery Level [%d %%]" { channel="zwave:device:248eb65576:node11:battery-level" }
+
+// Items pour l’ampoule dimmable (Node 12)
+Dimmer LightDimmer "Dimmer" { channel="zwave:device:248eb65576:node12:switch_dimmer" }

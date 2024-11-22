@@ -1,0 +1,29 @@
+sitemap zwave label="Maison Z-Wave" {
+    Frame label="Contrôleur Z-Wave" {
+        Text item=ZWaveController_StartFrames label="Start Frames [%d]"
+        Text item=ZWaveController_FramesAcknowledged label="Frames Acknowledged [%d]"
+        Text item=ZWaveController_FramesRejected label="Frames Rejected [%d]"
+        Text item=ZWaveController_FramesCancelled label="Frames Cancelled [%d]"
+        Text item=ZWaveController_OOFBytesReceived label="OOF Bytes Received [%d]"
+        Text item=ZWaveController_ChecksumErrors label="Checksum Errors [%d]"
+    }
+    
+    Frame label="Capteur de Porte/Fenêtre" {
+        Switch item=DoorSensor_Binary label="État du capteur binaire"
+        Text item=DoorSensor_TamperAlarm label="Alarme de sabotage [%s]"
+        Text item=DoorSensor label="État de la porte [%s]"
+        Text item=DoorSensor_Battery label="Niveau de batterie [%d %%]"
+    }
+    
+    Frame label="Détecteur de Mouvement" {
+        Switch item=MotionSensor_Binary label="État du capteur binaire"
+        Text item=MotionSensor_Luminance label="Luminosité [%.1f lx]"
+        Text item=MotionSensor_TamperAlarm label="Alarme de sabotage [%s]"
+        Text item=MotionSensor_MotionAlarm label="Alarme de mouvement [%s]"
+        Text item=MotionSensor_Battery label="Niveau de batterie [%d %%]"
+    }
+    
+    Frame label="Éclairage Dimmable" {
+        Slider item=LightDimmer label="Luminosité de l'ampoule [%d %%]"
+    }
+}

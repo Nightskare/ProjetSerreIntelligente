@@ -1,0 +1,43 @@
+// import org.eclipse.smarthome.model.script.ScriptServiceUtil
+// import org.eclipse.smarthome.core.library.items.StringItem
+// import java.util.ArrayList
+val TAG_FileName = "chambre.rules"
+rule "Démarrage de openHAB"
+when
+    System started
+then
+    logInfo(TAG_FileName, "Rule : Démarrage de openHAB")
+    // il n'y a personne dans la pièce et l'éclairage est fermé
+    chambre.postUpdate(OFF)
+    // lit.postUpdate(OFF)
+    // porte.postUpdate(OFF)
+    detecteur_mvt_plafond.postUpdate(OFF)
+    ampoule_plafonnier.postUpdate(OFF)
+end
+
+rule "reset simulation"
+when
+    // Item simulation changed from ON to OFF
+    Item simulation received update
+then
+    logInfo(TAG_FileName, "Rule : reset simulation")
+    chambre.state = simulation.state
+    detecteur_mvt_plafond.state = simulation.state
+    ampoule_plafonnier.state = simulation.state
+ // chambre.postUpdate(OFF)
+ // lit.postUpdate(OFF)
+ // porte.postUpdate(OFF)
+ // ampoule_plafonnier.postUpdate(OFF)
+end
+// Lier environnement simulé (zones) et les capteurs
+
+
+rule "Luminosité basse"
+when
+    Item MotionSensor_Luminance changed
+then
+    logInfo(TAG_FileName, "Rule : Luminosité basse")
+    logInfo(TAG_FileName, "triggeringItem.state"+triggeringItem.state)
+    if (MotionSensor_Luminance < 200)
+        sendCommand(LightDimmer,100%)
+end
