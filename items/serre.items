@@ -1,0 +1,3 @@
+Number Temperature "Température [%.0f °C]"
+Switch Heater "Chauffage"
+Switch Vent "Ouverture de la serre"

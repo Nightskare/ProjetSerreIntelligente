@@ -41,3 +41,24 @@ then
     if (MotionSensor_Luminance < 200)
         sendCommand(LightDimmer,100%)
 end
+
+rule "Gestion de la serre en fonction de la température"
+when
+    Item Temperature changed
+then
+    val temp = Temperature.state as Number
+
+    // Gestion de la ventilation
+    if (temp > 20) {
+        Vent.sendCommand(ON) // Ouvrir la serre
+    } else {
+        Vent.sendCommand(OFF) // Fermer la serre
+    }
+
+    // Gestion du chauffage
+    if (temp < 5) {
+        Heater.sendCommand(ON) // Allumer le chauffage
+    } else {
+        Heater.sendCommand(OFF) // Éteindre le chauffage
+    }
+end
