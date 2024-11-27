@@ -1,0 +1,32 @@
+rule "Contrôle du chauffage en fonction de la température"
+when
+    Item Temperature changed
+then
+    val temp = Temperature.state as Number
+    logInfo("Serre", "Température actuelle : " + temp + "°C")
+
+    if (temp < 10) {
+        Heater.sendCommand(ON)
+        logInfo("Serre", "Chauffage allumé car température inférieure à 10°C.")
+    } else {
+        Heater.sendCommand(OFF)
+        logInfo("Serre", "Chauffage éteint car température supérieure ou égale à 10°C.")
+    }
+end
+
+rule "Contrôle de l'ouverture de la serre en fonction de la température"
+when
+    Item Temperature changed
+then
+    val temp = Temperature.state as Number
+    logInfo("Serre", "Température actuelle : " + temp + "°C")
+
+    if (temp > 20) {
+        Vent.sendCommand(ON)
+        logInfo("Serre", "Serre ouverte car température supérieure à 20°C.")
+    } else {
+        Vent.sendCommand(OFF)
+        logInfo("Serre", "Serre fermée car température inférieure ou égale à 20°C.")
+    }
+end
+
