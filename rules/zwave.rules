@@ -1,43 +1,105 @@
 // import org.eclipse.smarthome.model.script.ScriptServiceUtil
 // import org.eclipse.smarthome.core.library.items.StringItem
 // import java.util.ArrayList
-val TAG_FileName = "chambre.rules"
-rule "Démarrage de openHAB"
+
+// Importation des classes nécessaires
+import org.eclipse.smarthome.model.script.ScriptServiceUtil
+import org.eclipse.smarthome.core.library.items.StringItem
+import java.util.ArrayList
+
+// Déclaration du nom du fichier pour les logs
+val TAG_FileName = "zwaves.rules"
+
+// Règle pour le démarrage d'OpenHAB
+rule "Démarrage de OpenHAB"
 when
     System started
 then
-    logInfo(TAG_FileName, "Rule : Démarrage de openHAB")
-    // il n'y a personne dans la pièce et l'éclairage est fermé
-    chambre.postUpdate(OFF)
-    // lit.postUpdate(OFF)
-    // porte.postUpdate(OFF)
-    detecteur_mvt_plafond.postUpdate(OFF)
-    ampoule_plafonnier.postUpdate(OFF)
+    logInfo(TAG_FileName, "Rule : Démarrage de OpenHAB")
+    
+    // Initialisation des états des objets Z-Wave
+    DoorSensor_Binary.postUpdate(OFF)          // Capteur de porte
+    MotionSensor_Binary.postUpdate(OFF)        // Capteur de mouvement
+    MotionSensor_MotionAlarm.postUpdate(OFF)   // Alarme de mouvement
+    LightDimmer.postUpdate(0)                  // Lampe éteinte
+    
+    logInfo(TAG_FileName, "Tous les états des objets Z-Wave ont été initialisés.")
 end
 
-rule "reset simulation"
+rule "Allumer la lampe si luminosité trop basse"
 when
-    // Item simulation changed from ON to OFF
-    Item simulation received update
+    Item MotionSensor_Luminance changed // La règle s'active lorsque la luminosité change
 then
-    logInfo(TAG_FileName, "Rule : reset simulation")
-    chambre.state = simulation.state
-    detecteur_mvt_plafond.state = simulation.state
-    ampoule_plafonnier.state = simulation.state
- // chambre.postUpdate(OFF)
- // lit.postUpdate(OFF)
- // porte.postUpdate(OFF)
- // ampoule_plafonnier.postUpdate(OFF)
+    // Récupérer la valeur actuelle de la luminosité
+    val luminance = MotionSensor_Luminance.state as Number
+
+    // Définir le seuil de luminosité
+    val seuil = 50
+
+    // Vérifier si la luminosité est inférieure au seuil
+    if (luminance < seuil) {
+        // Allumer la lampe à 100% de luminosité
+        LightDimmer.sendCommand(100)
+        logInfo("Règle Luminosité", "Luminosité basse détectée ({} lx), lampe allumée.", luminance)
+    } else {
+        // Éteindre la lampe si la luminosité est suffisante
+        LightDimmer.sendCommand(0)
+        logInfo("Règle Luminosité", "Luminosité suffisante ({} lx), lampe éteinte.", luminance)
+    }
 end
-// Lier environnement simulé (zones) et les capteurs
 
-
-rule "Luminosité basse"
+rule "Détection de sabotage et activation de l'alarme"
 when
-    Item MotionSensor_Luminance changed
+    Item DoorSensor_TamperAlarm changed to ON
 then
-    logInfo(TAG_FileName, "Rule : Luminosité basse")
-    logInfo(TAG_FileName, "triggeringItem.state"+triggeringItem.state)
-    if (MotionSensor_Luminance < 200)
-        sendCommand(LightDimmer,100%)
+    // Activer l'alarme simulée
+    Simulated_Alarm.sendCommand(ON)
+    logInfo("Règle Alarme", "Sabotage détecté ! Alarme activée.")
+
+    // Envoyer une notification à l'application mobile
+    sendNotification("malr2585@usherbrooke.ca","Alerte rouge","Sabotage détecté ! Vérifiez votre système immédiatement.")
+    sendNotification("Sabotage détecté ! Vérifiez votre système immédiatement.")
 end
+
+rule "Désactivation de l'alarme"
+when
+    Item DoorSensor_TamperAlarm changed to OFF
+then
+    // Désactiver l'alarme simulée
+    Simulated_Alarm.sendCommand(OFF)
+    logInfo("Règle Alarme", "Sabotage terminé. Alarme désactivée.")
+end
+rule "Détecter la présence du téléphone"
+when
+    Item PhonePresence changed
+then
+    if (PhonePresence.state == ON) {
+        logInfo("Présence", "Le téléphone est connecté au réseau.")
+    } else {
+        logInfo("Présence", "Le téléphone n'est plus connecté au réseau.")
+    }
+end
+
+rule "Détection d'intrusion"
+when
+    Item PhoneConnected changed or  // Événement 1 : Changement d'état du téléphone (connecté/déconnecté)
+    Item MotionSensor_MotionAlarm changed to ON // Événement 2 : Mouvement détecté
+then
+    // Si le téléphone est déconnecté et que le mouvement est détecté
+    if (PhoneConnected.state == OFF && MotionSensor_MotionAlarm.state == ON) {
+        // Activer l'alarme simulée
+        Simulated_Alarm.sendCommand(ON)
+        logInfo("Intrusion", "Intrusion détectée : téléphone absent et mouvement détecté.")
+
+        // Envoyer une notification à l'application mobile OpenHAB
+        sendNotification("malr2585@usherbrooke.ca","Intrusion détectée ! Téléphone absent et mouvement détecté.")
+        sendNotification("Intrusion détectée ! Téléphone absent et mouvement détecté.")
+    }
+    
+    // Si le téléphone se reconnecte, désactiver l'alarme
+    if (PhoneConnected.state == ON) {
+        Simulated_Alarm.sendCommand(OFF)
+        logInfo("Présence", "Le téléphone est revenu à la maison. L'alarme est désactivée.")
+    }
+end
+

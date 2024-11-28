@@ -26,4 +26,12 @@ sitemap zwave label="Maison Z-Wave" {
     Frame label="Éclairage Dimmable" {
         Slider item=LightDimmer label="Luminosité de l'ampoule [%d %%]"
     }
+    Frame label="Alarme" {
+        Switch item=Simulated_Alarm label="État de l'alarme [%s]" icon="siren"
+    }
+    Frame label="Téléphone" {
+        Switch item=PhoneConnected label="Connecté [%s]"
+        Text item=PhoneLatency label="Latence [%d ms]"
+        Text item=PhoneLastSeen label="Dernière Activité [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]"
+    }
 }

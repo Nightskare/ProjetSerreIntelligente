@@ -21,3 +21,15 @@ Number MotionSensor_Battery "Battery Level [%d %%]" { channel="zwave:device:248e
 
 // Items pour l’ampoule dimmable (Node 12)
 Dimmer LightDimmer "Dimmer" { channel="zwave:device:248eb65576:node12:switch_dimmer" }
+
+// Alarme simulée
+Switch Simulated_Alarm "Alarme simulée [%s]"
+
+
+// Item pour surveiller si le périphérique est connecté
+Switch PhoneConnected "Téléphone connecté (Wi-Fi)" { channel="network:pingdevice:af49cafe63:online" }
+Number PhoneLatency "Latence Téléphone [%.0f ms]" { channel="network:pingdevice:af49cafe63:latency" }
+DateTime PhoneLastSeen "Dernière activité du téléphone [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]" { channel="network:pingdevice:af49cafe63:lastseen" }
+
+
+
