@@ -33,3 +33,10 @@ DateTime PhoneLastSeen "Dernière activité du téléphone [%1$tY-%1$tm-%1$td %1
 
 
 
+
+DateTime Sunset "Coucher du soleil [%1$tH:%1$tM]" <sunset>
+DateTime Sunrise "Lever du soleil [%1$tH:%1$tM]" <sunrise>
+
+DateTime CurrentTime "Heure actuelle [%1$tH:%1$tM]" <clock>
+
+Switch Simulated_Lamp "Lampe simulée" <light>

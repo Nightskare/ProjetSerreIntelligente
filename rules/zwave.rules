@@ -6,6 +6,7 @@
 import org.eclipse.smarthome.model.script.ScriptServiceUtil
 import org.eclipse.smarthome.core.library.items.StringItem
 import java.util.ArrayList
+import org.json.JSONObject
 
 // Déclaration du nom du fichier pour les logs
 val TAG_FileName = "zwaves.rules"
@@ -22,7 +23,8 @@ then
     MotionSensor_Binary.postUpdate(OFF)        // Capteur de mouvement
     MotionSensor_MotionAlarm.postUpdate(OFF)   // Alarme de mouvement
     LightDimmer.postUpdate(0)                  // Lampe éteinte
-    
+    Simulated_Lamp.postUpdate(OFF)             // Lampe simulée éteinte
+
     logInfo(TAG_FileName, "Tous les états des objets Z-Wave ont été initialisés.")
 end
 
@@ -100,6 +102,94 @@ then
     if (PhoneConnected.state == ON) {
         Simulated_Alarm.sendCommand(OFF)
         logInfo("Présence", "Le téléphone est revenu à la maison. L'alarme est désactivée.")
+    }
+end
+
+
+
+rule "Update Sunset and Sunrise times"
+when
+    Time cron "0 * * * * ?"  // Exécute chaque minute pour tester
+then
+    // Appel à l'API externe pour obtenir les horaires de lever et coucher du soleil
+    val String response = sendHttpGetRequest("https://api.sunrisesunset.io/json?lat=45.40008&lng=-71.89908&time_format=24")
+    
+    logInfo("Sunset/Sunrise Update", "API Response: " + response)
+
+    // Vérification de la réponse et extraction des données JSON
+    if (response !== null && response !== "") {
+        // Extraction des horaires de lever et coucher du soleil
+        val sunset = transform("JSONPATH", "$.results.sunset", response)
+        val sunrise = transform("JSONPATH", "$.results.sunrise", response)
+        
+        logInfo("Sunset/Sunrise Update", "Sunset: " + sunset + ", Sunrise: " + sunrise)
+        // Formatage des horaires pour obtenir un format valide
+
+
+        // Obtention de la date actuelle
+        val currentDate = LocalDate.now.toString 
+
+        logInfo("Sunset/Sunrise Update", "Current Date: " + currentDate)
+        
+        // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
+        // Combine la date actuelle avec l'heure extraite de l'API
+        val sunriseTimeString = currentDate + "T" + sunrise
+        val sunsetTimeString = currentDate + "T" + sunset
+
+        logInfo("Sunset/Sunrise Update", "Formatted Sunrise: " + sunriseTimeString + ", Formatted Sunset: " + sunsetTimeString)
+
+        // Création des objets DateTimeType avec un format valide
+        val sunriseTime = new DateTimeType(sunriseTimeString)
+        val sunsetTime = new DateTimeType(sunsetTimeString)
+
+        // Mise à jour des objets de l'interface utilisateur
+        Sunset.postUpdate(sunsetTime)
+        Sunrise.postUpdate(sunriseTime)
+        
+    } else {
+        // Valeurs par défaut en cas d'échec de la récupération
+        val defaultSunset = "2024-11-30T17:30:00"
+        val defaultSunrise = "2024-12-01T07:00:00"
+        
+        Sunset.postUpdate(new DateTimeType(defaultSunset))
+        Sunrise.postUpdate(new DateTimeType(defaultSunrise))
+        
+        logError("Sunset/Sunrise Update", "Erreur lors de la récupération des données de lever et de coucher du soleil.")
+    }
+
+    // Simulation de la mise à jour de l'heure actuelle
+    CurrentTime.postUpdate(new DateTimeType())
+end
+
+
+rule "Allume la lampe la nuit"
+when
+    Time cron "0 * * * * ?" // Exécute chaque minute pour tester
+then
+    logInfo("Lampe Nuit", "Vérification de l'heure actuelle.")
+
+    // Récupérer les états des éléments Sunset, Sunrise et CurrentTime
+    val currentTime = now // Obtenir l'heure actuelle sous forme de ZonedDateTime
+    val sunsetState = Sunset.state
+    val sunriseState = Sunrise.state
+
+    // Vérifier si les états de Sunset et Sunrise sont définis
+    if (sunsetState instanceof DateTimeType && sunriseState instanceof DateTimeType) {
+        val sunsetTime = (sunsetState as DateTimeType).zonedDateTime
+        val sunriseTime = (sunriseState as DateTimeType).zonedDateTime
+
+        logInfo("Lampe Nuit", "CurrentTime: " + currentTime + ", Sunset: " + sunsetTime + ", Sunrise: " + sunriseTime)
+
+        // Vérifier si l'heure actuelle est entre le coucher et le lever du soleil
+        if (currentTime.isAfter(sunsetTime) && currentTime.isBefore(sunriseTime)) {
+            // Allumer la lampe à 50% de luminosité
+            Simulated_Lamp.postUpdate(ON)
+            logInfo("Lampe Nuit", "Il fait nuit. Allumage de la lampe à 50%.")
+        } else {            
+            logInfo("Lampe Nuit", "Il fait jour. Pas besoin de forcer l'allumage de la lampe.")
+        }
+    } else {
+        logWarn("Lampe Nuit", "Les états de Sunset ou Sunrise ne sont pas valides.")
     }
 end
 
