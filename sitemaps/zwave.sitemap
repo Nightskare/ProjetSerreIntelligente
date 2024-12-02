@@ -52,14 +52,5 @@ sitemap zwave label="Maison Z-Wave" {
         Text item=CurrentTime label="Heure actuelle [%1$tH:%1$tM]"
         Switch item=Simulated_Lamp label="Lampe simulée"
     }
-    Frame label="Controle simulé" {
-        Slider item=Temperature label="Température [%.0f °C]" icon="temperature" minValue=0 maxValue=40 step=1
-    }
-    Frame label="État de la serre" {
-        Text item=Temperature label="Température actuelle [%.0f °C]" icon="temperature"
-        Switch item=Heater label="Chauffage" icon="heating" mappings=[ON="Allumé", OFF="Éteint"]
-        Switch item=Vent label="Serre" icon="greenhouse" mappings=[ON="Ouvert", OFF="Fermé"]
-    }
-
 
 }

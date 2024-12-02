@@ -105,7 +105,37 @@ then
     }
 end
 
-
+rule "Notification si la batterie est faible"
+when
+    // Cette règle est déclenchée à chaque fois qu'un niveau de batterie change
+    Item DoorSensor_Battery changed or
+    Item MotionSensor_Battery changed or
+    Item LightDimmer_Battery changed or
+    Item ZWaveController_Battery changed or
+    Item NoiseSensor_Battery changed
+then
+    // Vérifie si le niveau de batterie est inférieur à 20%
+    if (DoorSensor_Battery.state < 20) {
+        // Alerte pour le capteur de porte
+        sendBroadcastNotification("Alerte : Batterie du capteur de porte faible!")
+    }
+    if (MotionSensor_Battery.state < 20) {
+        // Alerte pour le détecteur de mouvement
+        sendBroadcastNotification("Alerte : Batterie du détecteur de mouvement faible!")
+    }
+    if (LightDimmer_Battery.state < 20) {
+        // Alerte pour l'ampoule dimmable
+        sendBroadcastNotification("Alerte : Batterie de l'ampoule dimmable faible!")
+    }
+    if (NoiseSensor_Battery.state < 20) {
+        // Alerte pour le capteur sonore
+        sendBroadcastNotification("Alerte : Batterie du capteur sonore faible!")
+    }
+    if (ZWaveController_Battery.state < 20) {
+        // Alerte pour le contrôleur Z-Wave
+        sendBroadcastNotification("Alerte : Batterie du contrôleur Z-Wave faible!")
+    }
+end
 
 rule "Update Sunset and Sunrise times"
 when
@@ -193,28 +223,6 @@ then
     }
 end
 
-
-
-rule "Gestion de la serre en fonction de la température"
-when
-    Item Temperature changed
-then
-    val temp = Temperature.state as Number
-
-    // Gestion de la ventilation
-    if (temp > 20) {
-        Vent.sendCommand(ON) // Ouvrir la serre
-    } else {
-        Vent.sendCommand(OFF) // Fermer la serre
-    }
-
-    // Gestion du chauffage
-    if (temp < 5) {
-        Heater.sendCommand(ON) // Allumer le chauffage
-    } else {
-        Heater.sendCommand(OFF) // Éteindre le chauffage
-    }
-end
 
 
 rule "Gestion de la serre en fonction de la température"
