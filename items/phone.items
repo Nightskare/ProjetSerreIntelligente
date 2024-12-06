@@ -1,0 +1,4 @@
+// Items pour surveiller si le périphérique est connecté
+Switch PhoneConnected "Téléphone connecté (Wi-Fi)" (gPhone) { channel="network:pingdevice:af49cafe63:online" }
+Number PhoneLatency "Latence Téléphone [%.0f ms]" (gPhone) { channel="network:pingdevice:af49cafe63:latency" }
+DateTime PhoneLastSeen "Dernière activité du téléphone [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]" (gPhone) { channel="network:pingdevice:af49cafe63:lastseen" }

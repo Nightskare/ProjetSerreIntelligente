@@ -1,0 +1,15 @@
+// Items pour le capteur de porte (Node 10)
+Switch DoorSensor_Binary "Binary Sensor" (gDoorSensor) { channel="zwave:device:248eb65576:node10:sensor_binary" }
+Switch DoorSensor_TamperAlarm "Tamper Alarm" (gAlarms) { channel="zwave:device:248eb65576:node10:alarm_tamper" }
+Contact DoorSensor "Door Sensor" (gDoorSensor) { channel="zwave:device:248eb65576:node10:sensor_door" }
+Number DoorSensor_Battery "Battery Level [%d %%]" (gBatterie) { channel="zwave:device:248eb65576:node10:battery-level" }
+
+// Items pour le détecteur de mouvement (Node 11)
+Switch MotionSensor_Binary "Binary Sensor" (gMotionSensor) { channel="zwave:device:248eb65576:node11:sensor_binary" }
+Switch MotionSensor_TamperAlarm "Tamper Alarm" (gAlarms) { channel="zwave:device:248eb65576:node11:alarm_tamper" }
+Switch MotionSensor_MotionAlarm "Motion Alarm" (gAlarms) { channel="zwave:device:248eb65576:node11:alarm_motion" }
+Number MotionSensor_Battery "Battery Level [%d %%]" (gBatterie) { channel="zwave:device:248eb65576:node11:battery-level" }
+
+// Alarme simulée
+Switch Simulated_Alarm "Alarme simulée [%s]" (gAlarms)
+Number MotionSensor_Luminance "Luminance [%.1f lx]" (gLighting) { channel="zwave:device:248eb65576:node11:sensor_luminance" }

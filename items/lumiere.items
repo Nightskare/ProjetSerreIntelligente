@@ -1,0 +1,4 @@
+DateTime Sunset "Coucher du soleil [%1$tH:%1$tM]" (gLighting)
+DateTime Sunrise "Lever du soleil [%1$tH:%1$tM]" (gLighting)
+DateTime CurrentTime "Heure actuelle [%1$tH:%1$tM]" (gLighting)
+Switch TriggerLuminosite "Déclenche la règle automatique"

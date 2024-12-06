@@ -1,0 +1,60 @@
+// Importation des classes nécessaires
+import org.eclipse.smarthome.model.script.ScriptServiceUtil
+import org.eclipse.smarthome.core.library.items.StringItem
+import java.util.ArrayList
+rule "Détection de sabotage et activation de l'alarme"
+when
+    Item DoorSensor_TamperAlarm changed to ON
+then
+    // Activer l'alarme simulée
+    Simulated_Alarm.sendCommand(ON)
+    logInfo("Règle Alarme", "Sabotage détecté ! Alarme activée.")
+
+    // Envoyer une notification à l'application mobile
+    sendNotification("malr2585@usherbrooke.ca","Alerte rouge","Sabotage détecté ! Vérifiez votre système immédiatement.")
+    sendNotification("Sabotage détecté ! Vérifiez votre système immédiatement.")
+end
+
+
+rule "Détection d'intrusion"
+when
+    Item PhoneConnected changed or  // Événement 1 : Changement d'état du téléphone (connecté/déconnecté)
+    Item MotionSensor_MotionAlarm changed to ON // Événement 2 : Mouvement détecté
+then
+    // Si le téléphone est déconnecté et que le mouvement est détecté
+    if (PhoneConnected.state == OFF && MotionSensor_MotionAlarm.state == ON) {
+        // Activer l'alarme simulée
+        Simulated_Alarm.sendCommand(ON)
+        logInfo("Intrusion", "Intrusion détectée : téléphone absent et mouvement détecté.")
+
+        // Envoyer une notification à l'application mobile OpenHAB
+        sendNotification("malr2585@usherbrooke.ca","Intrusion détectée ! Téléphone absent et mouvement détecté.")
+        sendNotification("Intrusion détectée ! Téléphone absent et mouvement détecté.")
+    }
+    
+    // Si le téléphone se reconnecte, désactiver l'alarme
+    if (PhoneConnected.state == ON) {
+        Simulated_Alarm.sendCommand(OFF)
+        logInfo("Présence", "Le téléphone est revenu à la maison. L'alarme est désactivée.")
+    }
+end
+
+
+rule "Désactivation de l'alarme"
+when
+    Item DoorSensor_TamperAlarm changed to OFF
+then
+    // Désactiver l'alarme simulée
+    Simulated_Alarm.sendCommand(OFF)
+    logInfo("Règle Alarme", "Sabotage terminé. Alarme désactivée.")
+end
+rule "Détecter la présence du téléphone"
+when
+    Item PhonePresence changed
+then
+    if (PhonePresence.state == ON) {
+        logInfo("Présence", "Le téléphone est connecté au réseau.")
+    } else {
+        logInfo("Présence", "Le téléphone n'est plus connecté au réseau.")
+    }
+end

@@ -1,0 +1,46 @@
+sitemap Serre label="Serre Z-Wave" {
+    
+    Frame label="Contrôle de la lumière" {
+        Switch item=EtatLumiere label="Choisissez un état" icon="chart" mappings=[0="Éteint", 2="Automatique", 1="Allumé"]
+    }
+    
+    Frame label="Controle simulé" {
+        Slider item=Temperature label="Température [%.0f °C]" icon="temperature" minValue=0 maxValue=40 step=1
+    }
+    Frame label="État de la serre" {
+        Text item=Temperature label="Température actuelle [%.0f °C]" icon="temperature"
+        Switch item=Heater label="Chauffage" icon="heating" mappings=[ON="Allumé", OFF="Éteint"]
+        Switch item=Vent label="Serre" icon="greenhouse" mappings=[ON="Ouvert", OFF="Fermé"]
+    }
+    Frame label="Capteur de Porte/Fenêtre" {
+        Switch item=DoorSensor_Binary label="État du capteur binaire"
+        Text item=DoorSensor_TamperAlarm label="Alarme de sabotage [%s]"
+        Text item=DoorSensor label="État de la porte [%s]"
+        Text item=DoorSensor_Battery label="Niveau de batterie [%d %%]"
+    }
+    
+    Frame label="Détecteur de Mouvement" {
+        Switch item=MotionSensor_Binary label="État du capteur binaire"
+        Text item=MotionSensor_Luminance label="Luminosité [%.1f lx]"
+        Text item=MotionSensor_TamperAlarm label="Alarme de sabotage [%s]"
+        Text item=MotionSensor_MotionAlarm label="Alarme de mouvement [%s]"
+        Text item=MotionSensor_Battery label="Niveau de batterie [%d %%]"
+    }
+    Frame label="Alarme" {
+        Switch item=Simulated_Alarm label="État de l'alarme [%s]" icon="siren"
+    }
+    Frame label="Téléphone" {
+        Switch item=PhoneConnected label="Connecté [%s]"
+        Text item=PhoneLatency label="Latence [%d ms]"
+        Text item=PhoneLastSeen label="Dernière Activité [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]"
+    }
+
+    Frame label="Horaires du Soleil" {
+        Text item=Sunset label="Coucher du soleil [%1$tH:%1$tM]"
+        Text item=Sunrise label="Lever du soleil [%1$tH:%1$tM]"
+        Text item=CurrentTime label="Heure actuelle [%1$tH:%1$tM]"
+    }
+
+    
+
+}

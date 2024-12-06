@@ -1,4 +1,4 @@
-sitemap zwave label="Maison Z-Wave" {
+sitemap zwave label="Z-Wave" {
     Frame label="Contrôleur Z-Wave" {
         Text item=ZWaveController_StartFrames label="Start Frames [%d]"
         Text item=ZWaveController_FramesAcknowledged label="Frames Acknowledged [%d]"
@@ -34,8 +34,6 @@ sitemap zwave label="Maison Z-Wave" {
         Switch item=Heater label="Chauffage" icon="heating" mappings=[ON="Allumé", OFF="Éteint"]
         Switch item=Vent label="Serre" icon="greenhouse" mappings=[ON="Ouvert", OFF="Fermé"]
     }
-
-
     Frame label="Alarme" {
         Switch item=Simulated_Alarm label="État de l'alarme [%s]" icon="siren"
     }
@@ -45,12 +43,15 @@ sitemap zwave label="Maison Z-Wave" {
         Text item=PhoneLastSeen label="Dernière Activité [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]"
     }
 
-
     Frame label="Horaires du Soleil" {
         Text item=Sunset label="Coucher du soleil [%1$tH:%1$tM]"
         Text item=Sunrise label="Lever du soleil [%1$tH:%1$tM]"
         Text item=CurrentTime label="Heure actuelle [%1$tH:%1$tM]"
         Switch item=Simulated_Lamp label="Lampe simulée"
+    }
+
+    Frame label="Contrôle de la lumière" {
+        Switch item=EtatLumiere label="Choisissez un état" icon="chart" mappings=[0="Éteint", 2="Automatique", 1="Allumé"]
     }
 
 }

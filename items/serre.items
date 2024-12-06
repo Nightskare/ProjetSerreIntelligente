@@ -1,3 +1,5 @@
 Number Temperature "Température [%.0f °C]"
 Switch Heater "Chauffage"
 Switch Vent "Ouverture de la serre"
+Dimmer LightDimmer "Dimmer" (gLighting) { channel="zwave:device:248eb65576:node12:switch_dimmer" }
+Number EtatLumiere "État de la gestion de la lumière [%d]" (gLighting)

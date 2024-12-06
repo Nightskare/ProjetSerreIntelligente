@@ -15,34 +15,3 @@ Number ZWaveController_FramesCancelled "Frames Cancelled [%d]" (gZWaveController
 Number ZWaveController_OOFBytesReceived "OOF Bytes Received [%d]" (gZWaveController) { channel="zwave:serial_zstick:248eb65576:serial_oof" }
 Number ZWaveController_ChecksumErrors "Received Checksum Errors [%d]" (gZWaveController) { channel="zwave:serial_zstick:248eb65576:serial_cse" }
 
-// Items pour le capteur de porte (Node 10)
-Switch DoorSensor_Binary "Binary Sensor" (gDoorSensor) { channel="zwave:device:248eb65576:node10:sensor_binary" }
-Switch DoorSensor_TamperAlarm "Tamper Alarm" (gAlarms) { channel="zwave:device:248eb65576:node10:alarm_tamper" }
-Contact DoorSensor "Door Sensor" (gDoorSensor) { channel="zwave:device:248eb65576:node10:sensor_door" }
-Number DoorSensor_Battery "Battery Level [%d %%]" (gBatterie) { channel="zwave:device:248eb65576:node10:battery-level" }
-
-// Items pour le détecteur de mouvement (Node 11)
-Switch MotionSensor_Binary "Binary Sensor" (gMotionSensor) { channel="zwave:device:248eb65576:node11:sensor_binary" }
-Number MotionSensor_Luminance "Luminance [%.1f lx]" (gMotionSensor) { channel="zwave:device:248eb65576:node11:sensor_luminance" }
-Switch MotionSensor_TamperAlarm "Tamper Alarm" (gAlarms) { channel="zwave:device:248eb65576:node11:alarm_tamper" }
-Switch MotionSensor_MotionAlarm "Motion Alarm" (gAlarms) { channel="zwave:device:248eb65576:node11:alarm_motion" }
-Number MotionSensor_Battery "Battery Level [%d %%]" (gBatterie) { channel="zwave:device:248eb65576:node11:battery-level" }
-
-// Items pour l’ampoule dimmable (Node 12)
-Dimmer LightDimmer "Dimmer" (gLighting) { channel="zwave:device:248eb65576:node12:switch_dimmer" }
-
-// Alarme simulée
-Switch Simulated_Alarm "Alarme simulée [%s]" (gAlarms)
-
-// Items pour surveiller si le périphérique est connecté
-Switch PhoneConnected "Téléphone connecté (Wi-Fi)" (gPhone) { channel="network:pingdevice:af49cafe63:online" }
-Number PhoneLatency "Latence Téléphone [%.0f ms]" (gPhone) { channel="network:pingdevice:af49cafe63:latency" }
-DateTime PhoneLastSeen "Dernière activité du téléphone [%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS]" (gPhone) { channel="network:pingdevice:af49cafe63:lastseen" }
-
-
-DateTime Sunset "Coucher du soleil [%1$tH:%1$tM]" <sunset>
-DateTime Sunrise "Lever du soleil [%1$tH:%1$tM]" <sunrise>
-
-DateTime CurrentTime "Heure actuelle [%1$tH:%1$tM]" <clock>
-
-Switch Simulated_Lamp "Lampe simulée" <light>
