@@ -1,0 +1,7 @@
+Thing mqtt:broker:myBroker [ host="broker.hivemq.com", port=1883, secure=false, discovery=false, clientID="openHAB2" ] {
+    Channels:
+        Type number : udes713serreLightScenarioEtatLumiere "État de la gestion de la lumière" 
+        [ stateTopic="udes/713/serre/light/scenario/etatLumiere", 
+          commandTopic="udes/713/serre/light/scenario/etatLumiere", 
+          transformationPattern="JSONPATH:$.etat" ]
+}

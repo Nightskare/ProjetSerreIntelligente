@@ -1,7 +1,6 @@
 // Importation des classes nécessaires
 import org.eclipse.smarthome.model.script.ScriptServiceUtil
 import org.eclipse.smarthome.core.library.items.StringItem
-import java.util.ArrayList
 
 
 var Boolean TriggerLuminosite = true
@@ -10,6 +9,9 @@ rule "Changer l'état de EtatLumiere"
 when
     Item EtatLumiere received command
 then
+
+    logInfo("EtatLumiere", "Commande reçue : " + receivedCommand)
+
     switch (receivedCommand as Number) { // Utilisation de receivedCommand pour traiter la commande reçue
         case 0: { // Mode Éteint
             logInfo("EtatLumiere", "État : OFF")
@@ -36,7 +38,6 @@ when
     Time cron "0 * * * * ?" // Exécute chaque minute pour tester
 then
     if (TriggerLuminosite) {
-        logInfo("Lampe Nuit", "Vérification de l'heure actuelle.")
 
         // Récupérer les états des éléments Sunset, Sunrise et CurrentTime
         val currentTime = now // Obtenir l'heure actuelle sous forme de ZonedDateTime
@@ -80,58 +81,132 @@ end
 
 
 
+rule "Changer l'état de la lumière en fonction de l'MQTT"
+when
+    Channel "mqtt:broker:myBroker:udes713serreLightScenarioEtatLumiere" triggered
+then
+	var actionName = receivedEvent.toString
+    var etat = transform("JSONPATH", "$.etat", actionName)
+
+    logInfo("EtatLumiere", "Valeur de 'etat' reçue : " + etat)
+
+    // Appliquer des actions en fonction de la valeur reçue
+    switch (etat) {
+        case "0": {
+            logInfo("EtatLumiere", "État : OFF")
+           EtatLumiere.postUpdate(0)
+        }
+        case "1": {
+            logInfo("EtatLumiere", "État : ON")
+            // Actions à effectuer pour allumer
+            EtatLumiere.postUpdate(1) 
+        }
+        case "2": {
+            logInfo("EtatLumiere", "État : Automatique")
+            // Actions pour mode automatique
+            EtatLumiere.postUpdate(2)
+        }
+    }
+end
+
+
+
+
+// Règle pour mettre à jour les valeurs de coucher et de lever du soleil
+// La mise à jour doit se faire une fois que le lever du soleil soit passé
 rule "Update Sunset and Sunrise times"
 when
     Time cron "0 * * * * ?"  // Exécute chaque minute pour tester
 then
-    // Appel à l'API externe pour obtenir les horaires de lever et coucher du soleil
-    val String response = sendHttpGetRequest("https://api.sunrisesunset.io/json?lat=45.40008&lng=-71.89908&time_format=24")
-    
-    logInfo("Sunset/Sunrise Update", "API Response: " + response)
 
-    // Vérification de la réponse et extraction des données JSON
-    if (response !== null && response !== "") {
-        // Extraction des horaires de lever et coucher du soleil
-        val sunset = transform("JSONPATH", "$.results.sunset", response)
-        val sunrise = transform("JSONPATH", "$.results.sunrise", response)
-        
-        logInfo("Sunset/Sunrise Update", "Sunset: " + sunset + ", Sunrise: " + sunrise)
-        // Formatage des horaires pour obtenir un format valide
-
-
-        // Obtention de la date actuelle
-        val currentDate = LocalDate.now.toString 
-
-        logInfo("Sunset/Sunrise Update", "Current Date: " + currentDate)
-        
-        // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
-        // Combine la date actuelle avec l'heure extraite de l'API
-        val sunriseTimeString = currentDate + "T" + sunrise
-        val sunsetTimeString = currentDate + "T" + sunset
-
-        logInfo("Sunset/Sunrise Update", "Formatted Sunrise: " + sunriseTimeString + ", Formatted Sunset: " + sunsetTimeString)
-
-        // Création des objets DateTimeType avec un format valide
-        val sunriseTime = new DateTimeType(sunriseTimeString)
-        val sunsetTime = new DateTimeType(sunsetTimeString)
-
-        // Mise à jour des objets de l'interface utilisateur
-        Sunset.postUpdate(sunsetTime)
-        Sunrise.postUpdate(sunriseTime)
-        
-    } else {
-        // Valeurs par défaut en cas d'échec de la récupération
-        val defaultSunset = "2024-11-30T17:30:00"
-        val defaultSunrise = "2024-12-01T07:00:00"
-        
-        Sunset.postUpdate(new DateTimeType(defaultSunset))
-        Sunrise.postUpdate(new DateTimeType(defaultSunrise))
-        
-        logError("Sunset/Sunrise Update", "Erreur lors de la récupération des données de lever et de coucher du soleil.")
-    }
-
-    // Simulation de la mise à jour de l'heure actuelle
+    // Mise à jour de l'heure actuelle de référence
     CurrentTime.postUpdate(new DateTimeType())
+    
+    // Heure actuelle
+    val currentTime = now
+
+    // Récupération de l'état actuel de Sunset
+    val sunsetState = Sunset.state
+
+    if (sunsetState instanceof DateTimeType) {
+        val sunsetTime = sunsetState.zonedDateTime
+
+        // Vérifie si le coucher de soleil est déjà passé
+        if (currentTime.isAfter(sunsetTime)) {
+            logInfo("Sunset/Sunrise Update", "Coucher de soleil dépassé ou mise à jour nécessaire.")
+            
+            // Mise à jour des horaires de lever et coucher du soleil
+            val String response = sendHttpGetRequest("https://api.sunrisesunset.io/json?lat=45.40008&lng=-71.89908&time_format=24")
+            
+            if (response !== null && response !== "") {
+                // Extraction des horaires de lever et coucher du soleil de la réponse JSON
+                val sunset = transform("JSONPATH", "$.results.sunset", response)
+                val sunrise = transform("JSONPATH", "$.results.sunrise", response)
+                
+
+                // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
+                val sunriseDate = LocalDate.now.toString 
+                val sunsetDate = LocalDate.now.plusDays(1).toString
+
+                val sunriseTimeString = sunriseDate + "T" + sunrise
+                val sunsetTimeString = sunsetDate + "T" + sunset
+
+                val sunriseTime = new DateTimeType(sunriseTimeString)
+                val sunsetTime = new DateTimeType(sunsetTimeString)
+
+                // Mise à jour des items avec les nouvelles valeurs
+                Sunset.postUpdate(sunsetTime)
+                Sunrise.postUpdate(sunriseTime)
+
+                logInfo("Sunset/Sunrise Update", "Sunrise : " + Sunrise.state + ", Sunset : " + Sunset.state)
+            }
+
+            // Pas de réponse : on garde les valeurs précédentes
+        } else {
+            logInfo("Sunset/Sunrise Update", "Pas encore besoin de mise à jour.")
+        }
+    } else {
+        // Si Sunset est NULL, on fait une mise à jour
+        logInfo("Sunset/Sunrise Update", "Pas encore de données pour le coucher de soleil, initialisation.")
+
+        // Mise à jour des horaires de lever et coucher du soleil
+        val String response = sendHttpGetRequest("https://api.sunrisesunset.io/json?lat=45.40008&lng=-71.89908&time_format=24")
+    
+        // Vérification de la réponse et extraction des données JSON
+        if (response !== null && response !== "") {
+            
+            // Extraction des horaires de lever et coucher du soleil de la réponse JSON
+            val sunset = transform("JSONPATH", "$.results.sunset", response)
+            val sunrise = transform("JSONPATH", "$.results.sunrise", response)
+        
+            // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
+            val sunriseDate = LocalDate.now.toString 
+            val sunsetDate = LocalDate.now.plusDays(1).toString
+
+            val sunriseTimeString = sunriseDate + "T" + sunrise
+            val sunsetTimeString = sunsetDate + "T" + sunset
+
+            val sunriseTime = new DateTimeType(sunriseTimeString)
+            val sunsetTime = new DateTimeType(sunsetTimeString)
+
+            // Mise à jour des items avec les nouvelles valeurs
+            Sunset.postUpdate(sunsetTime)
+            Sunrise.postUpdate(sunriseTime)
+
+            logInfo("Sunset/Sunrise Update", "Sunrise : " + Sunrise.state + ", Sunset : " + Sunset.state)
+
+        
+        } else {
+            // Valeurs par défaut pour l'initialisation
+            val defaultSunset = "2024-11-30T17:30:00"
+            val defaultSunrise = "2024-12-01T07:00:00"
+        
+            Sunset.postUpdate(new DateTimeType(defaultSunset))
+            Sunrise.postUpdate(new DateTimeType(defaultSunrise))
+        
+            logError("Sunset/Sunrise Update", "Erreur lors de la récupération des données de lever et de coucher du soleil.")
+        }
+    } 
 end
 
 

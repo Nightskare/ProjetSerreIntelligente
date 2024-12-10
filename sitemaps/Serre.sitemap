@@ -39,8 +39,6 @@ sitemap Serre label="Serre Z-Wave" {
         Text item=Sunset label="Coucher du soleil [%1$tH:%1$tM]"
         Text item=Sunrise label="Lever du soleil [%1$tH:%1$tM]"
         Text item=CurrentTime label="Heure actuelle [%1$tH:%1$tM]"
-    }
-
-    
+    }    
 
 }
