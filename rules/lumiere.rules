@@ -46,16 +46,16 @@ then
 
         // Vérifier si les états de Sunset et Sunrise sont définis
         if (sunsetState instanceof DateTimeType && sunriseState instanceof DateTimeType) {
-            val sunsetTime = (sunsetState as DateTimeType).zonedDateTime
-            val sunriseTime = (sunriseState as DateTimeType).zonedDateTime
+            val currentSunsetTime = (sunsetState as DateTimeType).zonedDateTime
+            val currentSunriseTime = (sunriseState as DateTimeType).zonedDateTime
 
-            logInfo("Lampe Nuit", "CurrentTime: " + currentTime + ", Sunset: " + sunsetTime + ", Sunrise: " + sunriseTime)
+            logInfo("Lampe Nuit", "CurrentTime: " + currentTime + ", Current Sunset: " + currentSunsetTime + ", Current Sunrise: " + currentSunriseTime)
 
             // Vérifier si l'heure actuelle est entre le coucher et le lever du soleil
-            if (currentTime.isAfter(sunsetTime) && currentTime.isBefore(sunriseTime)) {
+            if (currentTime.isAfter(currentSunsetTime) && currentTime.isBefore(currentSunriseTime)) {
+                logInfo("Lampe Nuit", "Il fait nuit. Allumage de la lampe.")
                 LightDimmer.postUpdate(100) // Allumer à pleine intensité
                 LightDimmer.sendCommand(100)
-                logInfo("Lampe Nuit", "Il fait nuit. Allumage de la lampe à 50%.")
             } else {            
                 logInfo("Lampe Nuit", "Il fait jour. On doit donc tester la luminosité.")
                 // Récupérer la valeur actuelle de la luminosité
@@ -127,12 +127,13 @@ then
 
     // Récupération de l'état actuel de Sunset
     val sunsetState = Sunset.state
-
+    val sunriseState = Sunrise.state
     if (sunsetState instanceof DateTimeType) {
-        val sunsetTime = sunsetState.zonedDateTime
+        val sunsetTime = (sunsetState as DateTimeType).zonedDateTime
+        val sunriseTime = (sunriseState as DateTimeType).zonedDateTime
 
         // Vérifie si le coucher de soleil est déjà passé
-        if (currentTime.isAfter(sunsetTime)) {
+        if (currentTime.isAfter(sunriseTime)) {
             logInfo("Sunset/Sunrise Update", "Coucher de soleil dépassé ou mise à jour nécessaire.")
             
             // Mise à jour des horaires de lever et coucher du soleil
@@ -145,8 +146,8 @@ then
                 
 
                 // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
-                val sunriseDate = LocalDate.now.toString 
-                val sunsetDate = LocalDate.now.plusDays(1).toString
+                val sunriseDate = LocalDate.now.plusDays(1).toString 
+                val sunsetDate = LocalDate.now.toString
 
                 val sunriseTimeString = sunriseDate + "T" + sunrise
                 val sunsetTimeString = sunsetDate + "T" + sunset
@@ -180,8 +181,8 @@ then
             val sunrise = transform("JSONPATH", "$.results.sunrise", response)
         
             // Formatage des horaires avec la date actuelle pour obtenir un format ISO 8601
-            val sunriseDate = LocalDate.now.toString 
-            val sunsetDate = LocalDate.now.plusDays(1).toString
+            val sunriseDate = LocalDate.now.plusDays(1).toString 
+            val sunsetDate = LocalDate.now.toString
 
             val sunriseTimeString = sunriseDate + "T" + sunrise
             val sunsetTimeString = sunsetDate + "T" + sunset
